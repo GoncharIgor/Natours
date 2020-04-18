@@ -1,52 +1,27 @@
 const Tour = require('../models/tour.model');
+const APIFeatures = require('../utils/api-features');
 
 // Greater then Query object in mongoDB: { duration: {$gte: 5}, difficulty: 'easy'}
 // result from req.params: { duration: { gte: '5' }, difficulty: 'easy' }
 // words to look for and add in query with '$': gte, gt, lte, lt
 
+exports.aliasTopTours = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
+
 exports.getAllTours = async (req, res) => {
   try {
-    // 1 way
-    /*   const tours = await Tour.find({
-      duration: 5,
-      difficulty: 'easy',
-    });*/
+    // let query = Tour.find(JSON.parse(queryString)); // find method returns a query Obj. That why we can chain f()
 
-    // 2 way
-    /*const query = Tour.find()
-      .where('duration')
-      .equals(5)
-      .where('difficulty')
-      .equals('easy');*/
-
-    // BUILD QUERY
-    // 1) Filtering
-    const queryObj = { ...req.query };
-    const fieldsToExclude = ['page', 'sort', 'limit', 'fields'];
-    fieldsToExclude.forEach((el) => delete queryObj[el]);
-
-    // 2) Advanced Filtering
-    let queryString = JSON.stringify(queryObj);
-    queryString = queryString.replace(
-      /\b(gte|gt|lte|lt)\b/g,
-      (matchedWord) => `$${matchedWord}`
-    );
-
-    let query = Tour.find(JSON.parse(queryString)); // find method returns a query Obj. That why we can chain f() above
-
-    // 3) Sorting
-    // if query Obj has 'sort' property
-    // string in browser: 127.0.0.1:3000/api/v1/tours?sort=-price,ratingsAverage (sort price Desc and by second parameter, as addition)
-    // but sort query in mongoose is with space: sort(price ratingsAverage). Thus - we split with space
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort('-createdAt');
-    }
-
-    // EXECUTE QUERY
-    const tours = await query;
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await features.query;
 
     // SEND RESPONSE
     res.status(200).json({
