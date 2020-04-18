@@ -1,0 +1,6 @@
+app/bower_components
+dist
+coverage
+node_modules
+lessons
+avocado-project

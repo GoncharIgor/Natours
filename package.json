@@ -1,0 +1,37 @@
+{
+  "name": "natours",
+  "version": "1.0.0",
+  "description": "Node JS and MongoDB",
+  "main": "index.js",
+  "scripts": {
+    "db:scripts": "node dev-data/data/import-dev-data.js --import",
+    "lint:fix": "eslint --fix \"**/*.js\"",
+    "start:dev": "nodemon server.js",
+    "start:prod": "NODE_ENV=production nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": "10"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "prettier": "^2.0.4",
+    "eslint": "^6.8.0",
+    "mongoose": "^5.9.7",
+    "eslint-config-prettier": "^6.10.1",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-config-airbnb": "^18.1.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.19.0",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0",
+    "slugify": "^1.4.0"
+  }
+}
