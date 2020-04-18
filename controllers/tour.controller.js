@@ -118,3 +118,93 @@ exports.deleteTour = async (req, res) => {
     });
   }
 };
+
+exports.getTourStats = async (req, res) => {
+  try {
+    const stats = await Tour.aggregate([
+      // stages can be used multiple times
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } },
+      },
+      {
+        $group: {
+          // _id: null, // no making of groups
+          // _id: {$toUpper: '$difficulty'} , // uppercase group name
+          _id: '$difficulty', // making groups by column name. Group name (e.g. - EASY) now becomes its ID
+          num: { $sum: 1 },
+          numRatings: { $sum: '$ratingsQuantity' },
+          avgRating: { $avg: '$ratingsAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+        },
+      },
+      {
+        $sort: {
+          avgPrice: 1, // ascending
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: { stats },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'failed',
+      message: 'Invalid data sent',
+    });
+  }
+};
+
+exports.getMonthlyPlan = async (req, res) => {
+  const year = +req.params.year;
+
+  try {
+    const plan = await Tour.aggregate([
+      {
+        $unwind: '$startDates', // if 1 document has array with 3 startDates, then 3 documents are created - 1 per date
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: '$startDates' },
+          amountOfTours: { $sum: 1 },
+          tours: { $push: '$name' },
+        },
+      },
+      {
+        $addFields: { month: '$_id' },
+      },
+      {
+        $project: {
+          _id: 0, // id will not be shown in results
+        },
+      },
+      {
+        $sort: { amountOfTours: -1 }, // descending
+      },
+      {
+        $limit: 12,
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: { plan },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'failed',
+      message: 'Invalid data sent',
+    });
+  }
+};
