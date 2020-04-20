@@ -75,9 +75,11 @@ exports.createTour = async (req, res) => {
       },
     });
   } catch (err) {
+    const message = err.message || 'Invalid data sent';
+
     res.status(400).json({
       status: 'failed',
-      message: 'Invalid data sent',
+      message,
     });
   }
 };
@@ -96,9 +98,11 @@ exports.updateTour = async (req, res) => {
       },
     });
   } catch (err) {
+    const message = err.message || 'Invalid data sent';
+
     res.status(400).json({
       status: 'failed',
-      message: 'Invalid data sent',
+      message,
     });
   }
 };
@@ -112,9 +116,11 @@ exports.deleteTour = async (req, res) => {
       data: null,
     });
   } catch (err) {
+    const message = err.message || 'Invalid data sent';
+
     res.status(400).json({
       status: 'failed',
-      message: 'Invalid data sent',
+      message,
     });
   }
 };

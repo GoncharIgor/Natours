@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -7,6 +8,7 @@ const tourSchema = new mongoose.Schema(
       required: [true, 'A tour must have a name'],
       unique: true,
     },
+    slug: String,
     duration: {
       type: Number,
       required: [true, 'A tour must have a duration'],
@@ -51,6 +53,10 @@ const tourSchema = new mongoose.Schema(
       default: Date.now(),
       select: false, // to hide field from response
     },
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
     startDates: [Date],
   },
   {
@@ -63,6 +69,34 @@ const tourSchema = new mongoose.Schema(
 // virtual properties can't be used in queries
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
+});
+
+// mongoose middleware to run before .save() and .create() commands, but NOT .insertManny(), or .find()
+// can have multiple same hooks
+tourSchema.pre('save', function (next) {
+  //this - is a Document that will be saved to DB
+  // create a new property 'slug' in Document
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+tourSchema.post('save', function (doc, next) {
+  next();
+});
+
+// hook before execution .find() query method
+// tourSchema.pre('find', function (next) {
+tourSchema.pre(/^find/, function (next) {
+  // all f() that start with 'find'
+  // 'this' keyword point to the current query, but not to the Document
+  this.find({ secretTour: { $ne: true } });
+  this.start = Date.now();
+  next();
+});
+
+tourSchema.post(/^find/, function (docs, next) {
+  console.log(`Query time execution: ${Date.now() - this.start} ms`);
+  next();
 });
 
 const Tour = mongoose.model('Tour', tourSchema);
