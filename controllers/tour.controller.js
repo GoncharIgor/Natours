@@ -1,5 +1,7 @@
 const Tour = require('../models/tour.model');
 const APIFeatures = require('../utils/api-features');
+const catchAsync = require('../utils/catch-async');
+const AppError = require('../utils/app-error');
 
 // Greater then Query object in mongoDB: { duration: {$gte: 5}, difficulty: 'easy'}
 // result from req.params: { duration: { gte: '5' }, difficulty: 'easy' }
@@ -12,157 +14,120 @@ exports.aliasTopTours = (req, res, next) => {
   next();
 };
 
-exports.getAllTours = async (req, res) => {
-  try {
-    // let query = Tour.find(JSON.parse(queryString)); // find method returns a query Obj. That why we can chain f()
+exports.getAllTours = catchAsync(async (req, res, next) => {
+  // let query = Tour.find(JSON.parse(queryString)); // find method returns a query Obj. That why we can chain f()
 
-    const features = new APIFeatures(Tour.find(), req.query)
-      .filter()
-      .sort()
-      .limitFields()
-      .paginate();
-    const tours = await features.query;
+  const features = new APIFeatures(Tour.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+  const tours = await features.query;
 
-    // SEND RESPONSE
-    res.status(200).json({
-      // will set content-type: application/json automatically
-      status: 'success',
-      requestedAt: req.requestTime, // req.requestTime was added in MW f()
-      results: tours.length,
-      data: {
-        tours,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'failed',
-      message: err,
-    });
-  }
-};
+  // SEND RESPONSE
+  res.status(200).json({
+    // will set content-type: application/json automatically
+    status: 'success',
+    requestedAt: req.requestTime, // req.requestTime was added in MW f()
+    results: tours.length,
+    data: {
+      tours,
+    },
+  });
+});
 
-exports.getTour = async (req, res) => {
+exports.getTour = catchAsync(async (req, res, next) => {
   // const tour = tours.find((tour) => tour.id === +req.params.id);
+  const tour = await Tour.findById(req.params.id);
+  // The shorthand for: Tour.findOne({ _id: req.params.id });
 
-  try {
-    const tour = await Tour.findById(req.params.id);
-    // The shorthand for: Tour.findOne({ _id: req.params.id });
-
-    res.status(200).json({
-      // will set content-type: application/json automatically
-      status: 'success',
-      requestedAt: req.requestTime, // req.requestTime was added in MW f()
-      data: {
-        tour,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'failed',
-      message: err,
-    });
+  if (!tour) {
+    return next(new AppError(`No tour found with ID: ${req.params.id}`, 404));
   }
-};
 
-exports.createTour = async (req, res) => {
-  try {
-    const newTour = await Tour.create(req.body);
+  res.status(200).json({
+    // will set content-type: application/json automatically
+    status: 'success',
+    requestedAt: req.requestTime, // req.requestTime was added in MW f()
+    data: {
+      tour,
+    },
+  });
+});
 
-    res.status(201).json({
-      status: 'success',
-      data: {
-        tour: newTour,
-      },
-    });
-  } catch (err) {
-    const message = err.message || 'Invalid data sent';
+exports.createTour = catchAsync(async (req, res, next) => {
+  const newTour = await Tour.create(req.body);
 
-    res.status(400).json({
-      status: 'failed',
-      message,
-    });
+  res.status(201).json({
+    status: 'success',
+    data: {
+      tour: newTour,
+    },
+  });
+});
+
+exports.updateTour = catchAsync(async (req, res, next) => {
+  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!tour) {
+    return next(new AppError(`No tour found with ID: ${req.params.id}`, 404));
   }
-};
 
-exports.updateTour = async (req, res) => {
-  try {
-    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour,
+    },
+  });
+});
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        tour,
-      },
-    });
-  } catch (err) {
-    const message = err.message || 'Invalid data sent';
+exports.deleteTour = catchAsync(async (req, res, next) => {
+  const tour = await Tour.findByIdAndDelete(req.params.id);
 
-    res.status(400).json({
-      status: 'failed',
-      message,
-    });
+  if (!tour) {
+    return next(new AppError(`No tour found with ID: ${req.params.id}`, 404));
   }
-};
 
-exports.deleteTour = async (req, res) => {
-  try {
-    await Tour.findByIdAndDelete(req.params.id);
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
 
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  } catch (err) {
-    const message = err.message || 'Invalid data sent';
-
-    res.status(400).json({
-      status: 'failed',
-      message,
-    });
-  }
-};
-
-exports.getTourStats = async (req, res) => {
-  try {
-    const stats = await Tour.aggregate([
-      // stages can be used multiple times
-      {
-        $match: { ratingsAverage: { $gte: 4.5 } },
+exports.getTourStats = catchAsync(async (req, res, next) => {
+  const stats = await Tour.aggregate([
+    // stages can be used multiple times
+    {
+      $match: { ratingsAverage: { $gte: 4.5 } },
+    },
+    {
+      $group: {
+        // _id: null, // no making of groups
+        // _id: {$toUpper: '$difficulty'} , // uppercase group name
+        _id: '$difficulty', // making groups by column name. Group name (e.g. - EASY) now becomes its ID
+        num: { $sum: 1 },
+        numRatings: { $sum: '$ratingsQuantity' },
+        avgRating: { $avg: '$ratingsAverage' },
+        avgPrice: { $avg: '$price' },
+        minPrice: { $min: '$price' },
+        maxPrice: { $max: '$price' },
       },
-      {
-        $group: {
-          // _id: null, // no making of groups
-          // _id: {$toUpper: '$difficulty'} , // uppercase group name
-          _id: '$difficulty', // making groups by column name. Group name (e.g. - EASY) now becomes its ID
-          num: { $sum: 1 },
-          numRatings: { $sum: '$ratingsQuantity' },
-          avgRating: { $avg: '$ratingsAverage' },
-          avgPrice: { $avg: '$price' },
-          minPrice: { $min: '$price' },
-          maxPrice: { $max: '$price' },
-        },
+    },
+    {
+      $sort: {
+        avgPrice: 1, // ascending
       },
-      {
-        $sort: {
-          avgPrice: 1, // ascending
-        },
-      },
-    ]);
+    },
+  ]);
 
-    res.status(200).json({
-      status: 'success',
-      data: { stats },
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: 'failed',
-      message: 'Invalid data sent',
-    });
-  }
-};
+  res.status(200).json({
+    status: 'success',
+    data: { stats },
+  });
+});
 
 exports.getMonthlyPlan = async (req, res) => {
   const year = +req.params.year;
@@ -208,9 +173,10 @@ exports.getMonthlyPlan = async (req, res) => {
       data: { plan },
     });
   } catch (err) {
+    const message = err.message || 'Invalid data sent';
     res.status(400).json({
       status: 'failed',
-      message: 'Invalid data sent',
+      message,
     });
   }
 };

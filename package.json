@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "db:scripts": "node dev-data/data/import-dev-data.js --import",
+    "debug": "ndb server.js",
     "lint:fix": "eslint --fix \"**/*.js\"",
     "start:dev": "nodemon server.js",
     "start:prod": "NODE_ENV=production nodemon server.js",
@@ -16,7 +17,8 @@
     "node": "10"
   },
   "devDependencies": {
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.2",
+    "ndb": "^1.1.5"
   },
   "dependencies": {
     "dotenv": "^8.2.0",
@@ -32,6 +34,7 @@
     "eslint-plugin-react": "^7.19.0",
     "express": "^4.17.1",
     "morgan": "^1.10.0",
-    "slugify": "^1.4.0"
+    "slugify": "^1.4.0",
+    "validator": "^13.0.0"
   }
 }
