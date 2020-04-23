@@ -18,7 +18,9 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.2",
-    "ndb": "^1.1.5"
+    "ndb": "^1.1.5",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^8.5.1"
   },
   "dependencies": {
     "dotenv": "^8.2.0",
