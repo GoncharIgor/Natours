@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Please indicate your password'],
-    minLength: 8,
+    minlength: 8,
     select: false, // to hide field from response
   },
   passwordConfirm: {
@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
-  passwordResetExpired: String,
+  passwordResetExpires: String,
 });
 
 userSchema.pre('save', async function (next) {
@@ -52,6 +52,15 @@ userSchema.pre('save', async function (next) {
 
   this.password = await bcrypt.hash(this.password, 12); // 12 - measure how CP intensive operation will be. Higher - better encryption
   this.passwordConfirm = undefined; // field will be not added to DB
+  next();
+});
+
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) {
+    return next();
+  }
+
+  this.passwordChangedAt = Date.now() - 1000; // to be sure that JWT was made after password was changed (slow DB)
   next();
 });
 
