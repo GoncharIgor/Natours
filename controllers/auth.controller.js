@@ -15,6 +15,22 @@ const signToken = (id) => {
 const createAndSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
 
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  if (process.env.NODE_ENV === 'production') {
+    cookieOptions.secure = true;
+  }
+
+  // remove password from response body output
+  user.password = undefined;
+
+  res.cookie('jwt', token, cookieOptions);
+
   res.status(statusCode).json({
     status: 'success',
     token,
@@ -193,3 +209,9 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // Log in the user, send JWT
   createAndSendToken(user, 200, res);
 });
+
+// Example of NoSQl attack if we know password, but don't know email:
+// {
+// 	"email": {"$gt": ""},
+// 	"password": "123123123"
+// }
