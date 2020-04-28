@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 const validator = require('validator');
+const User = require('./user.model');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -78,8 +79,42 @@ const tourSchema = new mongoose.Schema(
       default: false,
     },
     startDates: [Date],
+    // Nested Embedded Object
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    // guides: Array, // for Embedding
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
+    // If you use toJSON() or toObject() mongoose will not include virtuals by default. This includes the output of calling JSON.stringify() on a Mongoose document
+    // To show virtual property in response - Pass { virtuals: true } to either toObject() or toJSON().
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
@@ -100,6 +135,14 @@ tourSchema.pre('save', function (next) {
   next();
 });
 
+// Embedding of users in Tours
+// takes user id from req.body.guides array and makes User objects from it
+/*tourSchema.pre('save', async function (next) {
+  const guidesPromises = this.guides.map(async (id) => await User.findById(id));
+  this.guides = await Promise.all(guidesPromises);
+  next();
+});*/
+
 tourSchema.post('save', function (doc, next) {
   next();
 });
@@ -111,6 +154,15 @@ tourSchema.pre(/^find/, function (next) {
   // 'this' keyword point to the current query, but not to the Document
   this.find({ secretTour: { $ne: true } });
   this.start = Date.now();
+  next();
+});
+
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    // populate = full User Obj instead of just its ID
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
   next();
 });
 

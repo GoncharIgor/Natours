@@ -14,7 +14,7 @@ mongoose
   })
   .then(() => console.log('DB connection successful'));
 
-const toursRaw = fs.readFileSync(`${__dirname}/tours-simple.json`, 'utf-8');
+const toursRaw = fs.readFileSync(`${__dirname}/tours.json`, 'utf-8');
 const tours = JSON.parse(toursRaw);
 
 const importData = async () => {
