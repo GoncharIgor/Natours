@@ -126,6 +126,13 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// virtual populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
+});
+
 // mongoose middleware to run before .save() and .create() commands, but NOT .insertManny(), or .find()
 // can have multiple same hooks
 tourSchema.pre('save', function (next) {
