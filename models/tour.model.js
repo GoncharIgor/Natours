@@ -159,7 +159,7 @@ tourSchema.pre(/^find/, function (next) {
 
 tourSchema.pre(/^find/, function (next) {
   this.populate({
-    // populate = full User Obj instead of just its ID
+    // populate = full User Obj instead of just its ID will be stored to 'guides' model.property
     path: 'guides',
     select: '-__v -passwordChangedAt',
   });
