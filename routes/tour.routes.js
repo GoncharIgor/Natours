@@ -1,6 +1,7 @@
 const express = require('express');
 const tourController = require('../controllers/tour.controller');
 const authController = require('../controllers/auth.controller');
+const reviewRouter = require('../routes/review.routes');
 
 const router = express.Router();
 
@@ -9,6 +10,8 @@ const router = express.Router();
 // app.get('/api/v1/tours', getAllTours);
 // app.post('/api/v1/tours', createTour);
 // the same as below
+
+router.use('/:tourId/reviews', reviewRouter); // user review router for current uri
 
 router
   .route('/top-5-cheap')

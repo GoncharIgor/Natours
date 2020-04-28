@@ -3,15 +3,21 @@ const APIFeatures = require('../utils/api-features');
 const catchAsync = require('../utils/catch-async');
 
 exports.getAllReviews = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Review.find(), req.query)
+  let filter = {};
+
+  if (req.params.tourId) {
+    filter = { tour: req.params.tourId };
+  }
+
+  const reviews = await Review.find(filter);
+
+  // OR
+  /*  const features = new APIFeatures(Review.find(), req.query)
     .filter()
     .sort()
     .limitFields()
     .paginate();
-  const reviews = await features.query;
-
-  // OR jsut simple
-  // const reviews = await Review.find();
+  const reviews = await features.query;*/
 
   // SEND RESPONSE
   res.status(200).json({
@@ -24,6 +30,15 @@ exports.getAllReviews = catchAsync(async (req, res, next) => {
 });
 
 exports.createReview = catchAsync(async (req, res, next) => {
+  // allow nested routes
+  if (!req.body.tour) {
+    req.body.tour = req.params.tourId;
+  }
+
+  if (!req.body.user) {
+    req.body.user = req.user.id;
+  }
+
   const newReview = await Review.create(req.body);
 
   res.status(201).json({

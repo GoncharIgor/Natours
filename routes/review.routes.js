@@ -2,7 +2,8 @@ const express = require('express');
 const reviewController = require('../controllers/review.controller');
 const authController = require('../controllers/auth.controller');
 
-const router = express.Router();
+// mergeParams - to get access to params of '/:tourId/reviews' redirector
+const router = express.Router({ mergeParams: true });
 
 router
   .route('/')
