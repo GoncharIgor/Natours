@@ -37,54 +37,11 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getTour = catchAsync(async (req, res, next) => {
-  // const tour = tours.find((tour) => tour.id === +req.params.id);
-  // we can also add .populate() f() here
-  const tour = await Tour.findById(req.params.id).populate('reviews');
-  // The shorthand for: Tour.findOne({ _id: req.params.id });
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 
-  if (!tour) {
-    return next(new AppError(`No tour found with ID: ${req.params.id}`, 404));
-  }
+exports.createTour = factory.createOne(Tour);
 
-  res.status(200).json({
-    // will set content-type: application/json automatically
-    status: 'success',
-    requestedAt: req.requestTime, // req.requestTime was added in MW f()
-    data: {
-      tour,
-    },
-  });
-});
-
-exports.createTour = catchAsync(async (req, res, next) => {
-  const newTour = await Tour.create(req.body);
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      tour: newTour,
-    },
-  });
-});
-
-exports.updateTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!tour) {
-    return next(new AppError(`No tour found with ID: ${req.params.id}`, 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
+exports.updateTour = factory.updateOne(Tour);
 
 exports.deleteTour = factory.deleteOne(Tour);
 
