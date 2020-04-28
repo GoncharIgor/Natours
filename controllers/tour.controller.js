@@ -2,6 +2,7 @@ const Tour = require('../models/tour.model');
 const APIFeatures = require('../utils/api-features');
 const catchAsync = require('../utils/catch-async');
 const AppError = require('../utils/app-error');
+const factory = require('./handler-factory');
 
 // Greater then Query object in mongoDB: { duration: {$gte: 5}, difficulty: 'easy'}
 // result from req.params: { duration: { gte: '5' }, difficulty: 'easy' }
@@ -85,7 +86,9 @@ exports.updateTour = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.deleteTour = catchAsync(async (req, res, next) => {
+exports.deleteTour = factory.deleteOne(Tour);
+
+/*exports.deleteTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findByIdAndDelete(req.params.id);
 
   if (!tour) {
@@ -96,7 +99,7 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
     status: 'success',
     data: null,
   });
-});
+});*/
 
 exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([
