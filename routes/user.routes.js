@@ -6,27 +6,21 @@ const router = express.Router();
 
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
-
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
 
-router.patch(
-  '/updatePassword',
-  authController.protect,
-  authController.updatePassword
-);
+// All below MW f() will now use this protect MW
+router.use(authController.protect);
 
-router.patch(
-  '/updateCurrentUser',
-  authController.protect,
-  userController.updateCurrentUser
-);
+router.patch('/updatePassword', authController.updatePassword);
 
-router.delete(
-  '/deleteCurrentUser',
-  authController.protect,
-  userController.deleteCurrentUser
-);
+router.get('/me', userController.getMe, userController.getUser);
+
+router.patch('/updateCurrentUser', userController.updateCurrentUser);
+
+router.delete('/deleteCurrentUser', userController.deleteCurrentUser);
+
+router.use(authController.restrictTo('admin'));
 
 router
   .route('/')

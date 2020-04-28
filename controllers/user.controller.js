@@ -13,6 +13,11 @@ const filterObj = (obj, ...allowedFields) => {
   return newObject;
 };
 
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+
 exports.updateCurrentUser = catchAsync(async (req, res, next) => {
   // Send error if user tries to update password
   if (req.body.password || req.body.passwordConfirm) {
