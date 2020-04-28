@@ -1,5 +1,6 @@
 const catchAsync = require('../utils/catch-async');
 const AppError = require('../utils/app-error');
+const APIFeatures = require('../utils/api-features');
 
 exports.deleteOne = (Model) => {
   return catchAsync(async (req, res, next) => {
@@ -76,6 +77,37 @@ exports.getOne = (Model, populateOptions) => {
       requestedAt: req.requestTime, // req.requestTime was added in MW f()
       data: {
         data: document,
+      },
+    });
+  });
+};
+
+exports.getAll = (Model) => {
+  return catchAsync(async (req, res, next) => {
+    // let query = Tour.find(JSON.parse(queryString)); // find method returns a query Obj. That why we can chain f()
+
+    // hack to allow nested GET reviews on tour
+    let filter = {};
+
+    if (req.params.tourId) {
+      filter = { tour: req.params.tourId };
+    }
+
+    const features = new APIFeatures(Model.find(filter), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const documents = await features.query;
+
+    // SEND RESPONSE
+    res.status(200).json({
+      // will set content-type: application/json automatically
+      status: 'success',
+      requestedAt: req.requestTime, // req.requestTime was added in MW f()
+      results: documents.length,
+      data: {
+        data: documents,
       },
     });
   });

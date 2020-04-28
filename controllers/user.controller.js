@@ -13,19 +13,6 @@ const filterObj = (obj, ...allowedFields) => {
   return newObject;
 };
 
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
-
-  res.status(200).json({
-    status: 'success',
-    requestedAt: req.requestTime, // req.requestTime was added in MW f()
-    results: users.length,
-    data: {
-      users,
-    },
-  });
-});
-
 exports.updateCurrentUser = catchAsync(async (req, res, next) => {
   // Send error if user tries to update password
   if (req.body.password || req.body.passwordConfirm) {
@@ -60,6 +47,8 @@ exports.deleteCurrentUser = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
+
+exports.getAllUsers = factory.getAll(User);
 
 exports.getUser = factory.getOne(User);
 

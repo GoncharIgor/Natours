@@ -1,7 +1,5 @@
 const Tour = require('../models/tour.model');
-const APIFeatures = require('../utils/api-features');
 const catchAsync = require('../utils/catch-async');
-const AppError = require('../utils/app-error');
 const factory = require('./handler-factory');
 
 // Greater then Query object in mongoDB: { duration: {$gte: 5}, difficulty: 'easy'}
@@ -15,27 +13,8 @@ exports.aliasTopTours = (req, res, next) => {
   next();
 };
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  // let query = Tour.find(JSON.parse(queryString)); // find method returns a query Obj. That why we can chain f()
-
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const tours = await features.query;
-
-  // SEND RESPONSE
-  res.status(200).json({
-    // will set content-type: application/json automatically
-    status: 'success',
-    requestedAt: req.requestTime, // req.requestTime was added in MW f()
-    results: tours.length,
-    data: {
-      tours,
-    },
-  });
-});
+// URL dor getting tours with duration >= 7: {{URL}}/api/v1/tours?duration[gte]=7&sort=price
+exports.getAllTours = factory.getAll(Tour);
 
 exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 
@@ -44,19 +23,6 @@ exports.createTour = factory.createOne(Tour);
 exports.updateTour = factory.updateOne(Tour);
 
 exports.deleteTour = factory.deleteOne(Tour);
-
-/*exports.deleteTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndDelete(req.params.id);
-
-  if (!tour) {
-    return next(new AppError(`No tour found with ID: ${req.params.id}`, 404));
-  }
-
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-});*/
 
 exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([
@@ -141,3 +107,16 @@ exports.getMonthlyPlan = async (req, res) => {
     });
   }
 };
+
+/*exports.deleteTour = catchAsync(async (req, res, next) => {
+  const tour = await Tour.findByIdAndDelete(req.params.id);
+
+  if (!tour) {
+    return next(new AppError(`No tour found with ID: ${req.params.id}`, 404));
+  }
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});*/
