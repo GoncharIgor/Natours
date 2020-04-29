@@ -125,6 +125,7 @@ const tourSchema = new mongoose.Schema(
 // better to make indexes for mostly reading fields. If document often wrtitten - then NO. Cos index also takes space in DB
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
 
 // virtual properties are not stored in DB
 // virtual properties can't be used in queries

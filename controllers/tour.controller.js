@@ -1,6 +1,7 @@
 const Tour = require('../models/tour.model');
 const catchAsync = require('../utils/catch-async');
 const factory = require('./handler-factory');
+const AppError = require('../utils/app-error');
 
 // Greater then Query object in mongoDB: { duration: {$gte: 5}, difficulty: 'easy'}
 // result from req.params: { duration: { gte: '5' }, difficulty: 'easy' }
@@ -107,6 +108,40 @@ exports.getMonthlyPlan = async (req, res) => {
     });
   }
 };
+
+// testing url: {{URL}}/api/v1/tours/tours-within/200/center/34.111745,-118.113491/unit/mi
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+
+  if (!['mi', 'km'].includes(unit)) {
+    return next(new AppError('Please indicate either "km" or "mi" units', 400));
+  }
+
+  const [lat, lng] = latlng.split(',');
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+  if (!lat || !lng) {
+    return next(
+      new AppError('Please provide latitude and longitude parameters', 400)
+    );
+  }
+
+  const tours = await Tour.find({
+    startLocation: {
+      $geoWithin: {
+        $centerSphere: [[lng, lat], radius],
+      },
+    },
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: tours.length,
+    data: {
+      data: tours,
+    },
+  });
+});
 
 /*exports.deleteTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findByIdAndDelete(req.params.id);
