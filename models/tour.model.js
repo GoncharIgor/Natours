@@ -120,6 +120,11 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
+// tourSchema.index({ price: 1 }); // 1 - index in asc order; -1 = in desc order
+// better to make indexes for mostly reading fields. If document often wrtitten - then NO. Cos index also takes space in DB
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+
 // virtual properties are not stored in DB
 // virtual properties can't be used in queries
 tourSchema.virtual('durationWeeks').get(function () {

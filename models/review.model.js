@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Tour = require('./tour.model');
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -47,6 +48,50 @@ reviewSchema.pre(/^find/, function (next) {
   });
 
   next();
+});
+
+// static method
+reviewSchema.statics.calcAverageRatings = async function (tourId) {
+  // this - current model
+  const stats = await this.aggregate([
+    { $match: { tour: tourId } },
+    {
+      $group: {
+        _id: '$tour', // grouping all the tours by tour(ID) field
+        nRating: { $sum: 1 },
+        avgRating: { $avg: '$rating' },
+      },
+    },
+  ]);
+
+  if (stats.length > 0) {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsAverage: stats[0].avgRating,
+      ratingsQuantity: stats[0].nRating,
+    });
+  } else {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsAverage: 0,
+      ratingsQuantity: 4.5,
+    });
+  }
+};
+
+reviewSchema.post('save', function () {
+  // this - current review document
+  this.constructor.calcAverageRatings(this.tour);
+});
+
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  // we make property to pass data from 'pre' MW to next 'post' MW f()
+  // we find doc and pass it as prop to query object
+  this.rev = await this.findOne();
+  next();
+});
+
+reviewSchema.post(/^findOneAnd/, async function () {
+  //await this.findOne(); - can't be done, because query was already executed and not exist yet
+  await this.rev.constructor.calcAverageRatings(this.rev.tour);
 });
 
 const Review = mongoose.model('Review', reviewSchema);

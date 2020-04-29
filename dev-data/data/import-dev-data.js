@@ -26,6 +26,7 @@ const importData = async () => {
   try {
     await Tour.create(tours);
     // to remove from user model password encryption, because it's already encrypted in test data
+    // password to all users: "test1234"
     await User.create(users, { validateBeforeSave: false });
     await Review.create(reviews);
     console.log('Data successfully loaded');
