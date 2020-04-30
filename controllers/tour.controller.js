@@ -112,12 +112,12 @@ exports.getMonthlyPlan = async (req, res) => {
 // testing url: {{URL}}/api/v1/tours/tours-within/200/center/34.111745,-118.113491/unit/mi
 exports.getToursWithin = catchAsync(async (req, res, next) => {
   const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
 
   if (!['mi', 'km'].includes(unit)) {
     return next(new AppError('Please indicate either "km" or "mi" units', 400));
   }
 
-  const [lat, lng] = latlng.split(',');
   const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
 
   if (!lat || !lng) {
@@ -139,6 +139,51 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
     results: tours.length,
     data: {
       data: tours,
+    },
+  });
+});
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+
+  if (!['mi', 'km'].includes(unit)) {
+    return next(new AppError('Please indicate either "km" or "mi" units', 400));
+  }
+
+  const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
+
+  if (!lat || !lng) {
+    return next(
+      new AppError('Please provide latitude and longitude parameters', 400)
+    );
+  }
+
+  const distances = await Tour.aggregate([
+    {
+      // this stage always needs to be the first stage
+      $geoNear: {
+        near: {
+          type: 'Point',
+          coordinates: [+lng, +lat],
+        },
+        distanceField: 'distance',
+        distanceMultiplier: multiplier,
+      },
+    },
+    {
+      // will return only this fields
+      $project: {
+        distance: 1,
+        name: 1,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      data: distances,
     },
   });
 });
