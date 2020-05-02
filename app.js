@@ -1,3 +1,5 @@
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
@@ -14,6 +16,21 @@ const userRouter = require('./routes/user.routes');
 const reviewRouter = require('./routes/review.routes');
 const viewRouter = require('./routes/view.routes');
 
+const uiUrl = 'http://localhost:3000';
+
+const corsOptions = {
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'X-Access-Token',
+  ],
+  methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
+  origin: uiUrl,
+  optionsSuccessStatus: 200,
+};
+
 const app = express();
 
 app.set('view engine', 'pug');
@@ -22,6 +39,8 @@ app.set('views', `${path.join(__dirname, 'views')}`);
 // GLOBAL MW f()
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(helmet());
+
+app.use(cors(corsOptions));
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -39,6 +58,7 @@ app.use('/api', limiter);
 
 // middleware to get 'body' data from request object => makes req.body
 app.use(express.json({ limit: '10kb' }));
+// app.use(cookieParser());
 
 // Data sanitization against NoSqL injection and XSS
 app.use(mongoSanitize());
@@ -67,7 +87,7 @@ app.use((req, res, next) => {
 // ROUTES
 app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
-app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/users', userRouter);
 
 app.all('*', (req, res, next) => {
