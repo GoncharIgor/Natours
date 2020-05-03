@@ -30,32 +30,55 @@ const handleJWTExpiredError = () => {
   return new AppError('Your token has expired. Please login again', 401);
 };
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
+const sendErrorDev = (err, req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(err.statusCode).json({
+      status: err.status,
+      error: err,
+      message: err.message,
+      stack: err.stack,
+    });
+  }
+
+  console.error(err);
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong',
     message: err.message,
-    stack: err.stack,
   });
 };
 
-const sendErrorProd = (err, res) => {
-  // Operations error - incorrect data sent by client
-  // e.g - incorrect format of ID; model validation (not enum value); duplicated Name
-  if (err.isOperational) {
-    res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message,
-    });
-    // Programming error - a bug
-  } else {
-    console.error(err);
+const sendErrorProd = (err, req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    // Operations error - incorrect data sent by client
+    // e.g - incorrect format of ID; model validation (not enum value); duplicated Name
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+      // Programming error - a bug
+    }
 
-    res.status(500).json({
+    console.error(err);
+    return res.status(500).json({
       status: 'error',
       message: 'Something went wrong',
     });
   }
+
+  // Rendered Website
+  if (err.isOperational) {
+    return res.status(err.statusCode).render('error', {
+      title: 'Something went wrong',
+      message: err.message,
+    });
+  }
+
+  console.error(err);
+  return res.status(err.statusCode).render('error', {
+    title: 'Something went wrong',
+    message: 'Please try again later',
+  });
 };
 
 // by specifying 4 parameters in MW f(), express automatically knows that it is an Error handling f()
@@ -65,9 +88,10 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     let copyOfErr = { ...err };
+    copyOfErr.message = err.message;
 
     if (copyOfErr.name === 'CastError') {
       copyOfErr = handleCastErrorDB(err);
@@ -89,6 +113,6 @@ module.exports = (err, req, res, next) => {
       copyOfErr = handleJWTExpiredError();
     }
 
-    sendErrorProd(copyOfErr, res);
+    sendErrorProd(copyOfErr, req, res);
   }
 };
