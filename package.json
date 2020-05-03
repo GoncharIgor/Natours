@@ -9,7 +9,9 @@
     "lint:fix": "eslint --fix \"**/*.js\"",
     "start:dev": "nodemon server.js",
     "start:prod": "NODE_ENV=production nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch:js": "parcel watch ./public/js/index.js --out-dir ./public/js --out-file bundle.js",
+    "build:js": "parcel watch ./public/js/index.js --out-dir ./public/js --out-file bundle.js"
   },
   "author": "",
   "license": "ISC",
@@ -17,12 +19,15 @@
     "node": "10"
   },
   "devDependencies": {
+    "parcel-bundler": "^1.12.4",
     "nodemon": "^2.0.2",
     "ndb": "^1.1.5",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^8.5.1"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.8.7",
+    "axios": "^0.19.2 ",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.4",
     "dotenv": "^8.2.0",

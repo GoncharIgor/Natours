@@ -16,15 +16,16 @@ const userRouter = require('./routes/user.routes');
 const reviewRouter = require('./routes/review.routes');
 const viewRouter = require('./routes/view.routes');
 
-const uiUrl = 'http://localhost:3000';
+const uiUrl = 'http://127.0.0.1:3000';
 
 const corsOptions = {
   allowedHeaders: [
-    'Origin',
-    'X-Requested-With',
-    'Content-Type',
     'Accept',
+    'Authorization',
+    'Content-Type',
+    'Origin',
     'X-Access-Token',
+    'X-Requested-With',
   ],
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
   origin: uiUrl,
@@ -58,7 +59,7 @@ app.use('/api', limiter);
 
 // middleware to get 'body' data from request object => makes req.body
 app.use(express.json({ limit: '10kb' }));
-// app.use(cookieParser());
+app.use(cookieParser());
 
 // Data sanitization against NoSqL injection and XSS
 app.use(mongoSanitize());

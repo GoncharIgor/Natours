@@ -74,6 +74,16 @@ exports.login = catchAsync(async (req, res, next) => {
   createAndSendToken(user, 200, res);
 });
 
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'logged out', {
+    expires: new Date(Date.now + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({
+    status: 'success',
+  });
+};
+
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) get token and check if it's there
   let token;
@@ -82,6 +92,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {
@@ -125,6 +137,36 @@ exports.restrictTo = (...roles) => {
 
     next();
   };
+};
+
+// Only for rendered pages, no errors will be thrown
+// Also: simple try catch - because if user is logged out, jwt verification will fail
+exports.isLoggedIn = async (req, res, next) => {
+  if (req.cookies.jwt) {
+    try {
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      // check if user still exists
+      const freshUser = await User.findById(decoded.id);
+      if (!freshUser) {
+        return next();
+      }
+
+      // check if user changed password after the token was issued
+      if (freshUser.changePasswordAfter(decoded.iat)) {
+        return next();
+      }
+
+      // will create 'user' variable in pug template
+      res.locals.user = freshUser;
+    } catch (e) {
+      return next();
+    }
+  }
+  next();
 };
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
