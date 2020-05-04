@@ -13,7 +13,7 @@ router.patch('/resetPassword/:token', authController.resetPassword);
 // All below MW f() will now use this protect MW
 router.use(authController.protect);
 
-router.patch('/updatePassword', authController.updatePassword);
+router.patch('/updateMyPassword', authController.updatePassword);
 
 router.get('/me', userController.getMe, userController.getUser);
 

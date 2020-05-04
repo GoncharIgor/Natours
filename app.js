@@ -60,6 +60,13 @@ app.use('/api', limiter);
 // middleware to get 'body' data from request object => makes req.body
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
+app.use(
+  // to parse data from url: uri?param=aa
+  express.urlencoded({
+    extended: true,
+    limit: '10kb',
+  })
+);
 
 // Data sanitization against NoSqL injection and XSS
 app.use(mongoSanitize());
