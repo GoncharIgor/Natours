@@ -33,7 +33,10 @@ export const logout = async () => {
     });
     if (res.data.status === 'success') {
       // location.reload(true); // forces reload from server, but not from browser cache
-      location.reload();
+      //  location.reload();
+      window.setTimeout(() => {
+        location.assign('/');
+      }, 500);
     }
   } catch (err) {
     showAlert('error', 'Error logging out. Please try again');

@@ -12,7 +12,7 @@ header.header
         // -'user' var is received from authController.isLoggedIn f()
         if user
             a.nav__el.nav__el--logout Logout
-            a.nav__el(href='#')
+            a.nav__el(href='/me')
                 img.nav__user-img(src=`/img/users/${user.photo}` alt=`${user.name}`)
                 span= user.name.split(' ')[0]
         else

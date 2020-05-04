@@ -123,6 +123,8 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // current user is put to req.object, that can be used in next MW f()
   req.user = freshUser;
+  // will create 'user' variable in pug template
+  res.locals.user = freshUser;
   next();
 });
 
