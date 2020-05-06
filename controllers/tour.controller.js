@@ -1,3 +1,6 @@
+const multer = require('multer');
+const sharp = require('sharp');
+
 const Tour = require('../models/tour.model');
 const catchAsync = require('../utils/catch-async');
 const factory = require('./handler-factory');
@@ -6,6 +9,60 @@ const AppError = require('../utils/app-error');
 // Greater then Query object in mongoDB: { duration: {$gte: 5}, difficulty: 'easy'}
 // result from req.params: { duration: { gte: '5' }, difficulty: 'easy' }
 // words to look for and add in query with '$': gte, gt, lte, lt
+
+const multerStorage = multer.memoryStorage(); // image will be stored in memory buffer
+
+// check if uploaded file is image
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image. Please upload only images', 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 },
+]);
+
+// upload.array('images', 5)
+
+exports.resizeTourImages = catchAsync(async (req, res, next) => {
+  if (!req.files.imageCover || !req.files.images) {
+    return next();
+  }
+
+  // image cover
+  req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${req.body.imageCover}`);
+
+  // images
+  req.body.images = [];
+  await Promise.all(
+    req.files.images.map(async (imageFile, index) => {
+      const filename = `tour-${req.params.id}-${Date.now()}-${index + 1}.jpeg`;
+
+      await sharp(imageFile.buffer)
+        .resize(2000, 1333)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(`public/img/tours/${filename}`);
+
+      req.body.images.push(filename);
+    })
+  );
+  next();
+});
 
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';

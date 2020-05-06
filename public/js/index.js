@@ -26,11 +26,18 @@ if (loginForm) {
 
 if (updateUserInfoForm) {
   updateUserInfoForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const form = new FormData(); // for multipart form data
+    form.append('name', document.getElementById('name').value);
+    form.append('email', document.getElementById('email').value);
+    form.append('photo', document.getElementById('photo').files[0]);
+
+    updateUserSettings(form, 'data');
+
+    /* BEFORE WE HAD PHOTO
     const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
-
-    event.preventDefault();
-    updateUserSettings({ name, email }, 'data');
+    updateUserSettings({ name, email }, 'data');*/
   });
 }
 
