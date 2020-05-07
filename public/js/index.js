@@ -2,12 +2,14 @@
 import { login, logout } from './login';
 import { updateUserSettings } from './update-settings';
 import { displayMap } from './mapbox';
+import { bookTour } from './stripe';
 
 const mapElement = document.getElementById('map');
 const loginForm = document.querySelector('.login-form .form');
 const updateUserInfoForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-settings');
 const logoutButton = document.querySelector('.nav__el--logout');
+const bookTourButton = document.getElementById('book-tour');
 
 if (mapElement) {
   const locations = JSON.parse(mapElement.dataset.locations);
@@ -63,4 +65,13 @@ if (userPasswordForm) {
 
 if (logoutButton) {
   logoutButton.addEventListener('click', logout);
+}
+
+if (bookTourButton) {
+  bookTourButton.addEventListener('click', async (e) => {
+    e.target.textContent = 'Processing...';
+    const { tourId } = e.target.dataset; // converted from attribute: 'data-tour-id'
+    await bookTour(tourId);
+    e.target.textContent = 'Book tour now!'
+  });
 }

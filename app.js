@@ -15,6 +15,7 @@ const tourRouter = require('./routes/tour.routes');
 const userRouter = require('./routes/user.routes');
 const reviewRouter = require('./routes/review.routes');
 const viewRouter = require('./routes/view.routes');
+const bookingRouter = require('./routes/booking.routes');
 
 const uiUrl = 'http://127.0.0.1:3000';
 
@@ -97,6 +98,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/bookings', bookingRouter);
 
 app.all('*', (req, res, next) => {
   // anything that is passed in next() f() is treated as an Error
