@@ -18,7 +18,8 @@ const reviewRouter = require('./routes/review.routes');
 const viewRouter = require('./routes/view.routes');
 const bookingRouter = require('./routes/booking.routes');
 
-const uiUrl = 'http://127.0.0.1:3000';
+//const uiUrl = 'http://127.0.0.1:3000';
+const uiUrl = `${process.env.UI_URL}:${process.env.PORT}`;
 
 const corsOptions = {
   allowedHeaders: [
