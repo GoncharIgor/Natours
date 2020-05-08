@@ -32,6 +32,9 @@ const corsOptions = {
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
   origin: uiUrl,
   optionsSuccessStatus: 200,
+  // To enable HTTP cookies over CORS
+  credentials: true,
+  'Access-Control-Allow-Credentials': true,
 };
 
 const app = express();

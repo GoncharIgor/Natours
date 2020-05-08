@@ -3,8 +3,8 @@ const dotenv = require('dotenv');
 
 process.on('uncaughtException', (err) => {
   console.log('🤬 UNCAUGHT EXCEPTION');
-    console.log(err);
-    // console.log(`${err.name}: ${err.message}`);
+  console.log(err);
+  // console.log(`${err.name}: ${err.message}`);
   process.exit(1);
 });
 
@@ -22,6 +22,7 @@ mongoose
 
 const app = require('./app');
 
+// process.env.PORT: absolutely mandatory to indicate port through env variable for Heroku
 const port = process.env.PORT || 3000;
 
 const server = app.listen(port, () => {
