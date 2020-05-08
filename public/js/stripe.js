@@ -7,9 +7,7 @@ export const bookTour = async (tourId) => {
     // Get checkout session from API
     // for GET method we don't need to pass config object to axios
     // in axios the actual data from response is stored in Object property 'data'
-    const session = await axios(
-      `http://127.0.0.1:3000/api/v1/bookings/checkout-session/${tourId}`
-    );
+    const session = await axios(`/api/v1/bookings/checkout-session/${tourId}`);
 
     // create checkout form and charge credit card
     await stripe.redirectToCheckout({

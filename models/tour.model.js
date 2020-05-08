@@ -181,7 +181,7 @@ tourSchema.pre(/^find/, function (next) {
 });
 
 tourSchema.post(/^find/, function (docs, next) {
-  console.log(`Query time execution: ${Date.now() - this.start} ms`);
+  // console.log(`Query time execution: ${Date.now() - this.start} ms`);
   next();
 });
 
