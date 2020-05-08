@@ -25,7 +25,7 @@ const app = require('./app');
 // process.env.PORT: absolutely mandatory to indicate port through env variable for Heroku
 const port = process.env.PORT || 3000;
 
-const server = app.listen(port, () => {
+const server = app.listen(process.env.PORT, () => {
   console.log(`App running on port ${port}`);
 });
 
