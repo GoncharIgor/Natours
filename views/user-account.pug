@@ -13,10 +13,11 @@ block content
             nav.user-view__menu
                 ul.side-nav
                     +navItem('#', 'Settings', 'settings', true)
-                    +navItem('#', 'My bookings', 'briefcase')
+                    +navItem('/my-tours', 'My bookings', 'briefcase')
                     +navItem('#', 'My reviews', 'star')
                     +navItem('#', 'Billing', 'credit-card')
 
+                // - 'user' var is set in authController: res.locals.user = freshUser;
                 - if(user.role === 'admin')
                     .admin-nav
                         h5.admin-nav__heading Admin
