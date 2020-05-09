@@ -18,10 +18,10 @@ const reviewRouter = require('./routes/review.routes');
 const viewRouter = require('./routes/view.routes');
 const bookingRouter = require('./routes/booking.routes');
 
-//const uiUrl = 'http://127.0.0.1:3000';
-const uiUrl = `${process.env.UI_URL}:${process.env.PORT}`;
-
+// const uiUrl = 'http://127.0.0.1:3000';
+// const uiUrl = `${process.env.UI_URL}:${process.env.PORT}`;
 const corsOptions = {
+  // origin: uiUrl,
   allowedHeaders: [
     'Accept',
     'Authorization',
@@ -31,11 +31,11 @@ const corsOptions = {
     'X-Requested-With',
   ],
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
-  origin: uiUrl,
   optionsSuccessStatus: 200,
+  'Access-Control-Allow-Origin': '*',
   // To enable HTTP cookies over CORS
-  credentials: true,
-  'Access-Control-Allow-Credentials': true,
+  // credentials: true,
+  // 'Access-Control-Allow-Credentials': true,
 };
 
 const app = express();
@@ -46,10 +46,12 @@ app.set('view engine', 'pug');
 app.set('views', `${path.join(__dirname, 'views')}`);
 
 // GLOBAL MW f()
+// 'Access-Control-Allow-Origin': *, // allow all domains
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // for complex requests from client
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(helmet());
-
-app.use(cors(corsOptions));
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
