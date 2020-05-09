@@ -37,3 +37,14 @@ process.on('unhandledRejection', (err) => {
     process.exit(1);
   });
 });
+
+// heroku Dyno restart
+process.on('SIGTERM', (err) => {
+  console.log('🤬 SIGTERM received. Shutting down gracefully');
+
+  server.close(() => {
+    // not calling  process.exit(1);, because heroku SIGTERM will make it by itself
+    // but all pending requests still be processed before close
+    console.log('Process terminated');
+  });
+});

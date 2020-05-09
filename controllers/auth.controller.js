@@ -12,7 +12,7 @@ const signToken = (id) => {
   });
 };
 
-const createAndSendToken = (user, statusCode, res) => {
+const createAndSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
 
   const cookieOptions = {
@@ -20,11 +20,11 @@ const createAndSendToken = (user, statusCode, res) => {
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
+    // if (process.env.NODE_ENV === 'production') {
+    // in express we can use: req.secure
+    // 'x-forwarded-proto' - specific to heroku
+    secure: req.secure || req.headers['x-forwarded-proto'] === 'https', // will resolve to boolean
   };
-
-  if (process.env.NODE_ENV === 'production') {
-    cookieOptions.secure = true;
-  }
 
   // remove password from response body output
   user.password = undefined;
@@ -53,7 +53,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   const url = `${req.protocol}://${req.get('host')}/me`;
   await new Email(newUser, url).sendWelcome();
 
-  createAndSendToken(newUser, 201, res);
+  createAndSendToken(newUser, 201, req, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -73,7 +73,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // 3) Send token to client
-  createAndSendToken(user, 200, res);
+  createAndSendToken(user, 200, req, res);
 });
 
 exports.logout = (req, res) => {
@@ -232,7 +232,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: true }); // true - default value
 
   // Log in the user, send JWT
-  createAndSendToken(user, 200, res);
+  createAndSendToken(user, 200, req, res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -248,7 +248,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   await user.save();
 
   // Log in the user, send JWT
-  createAndSendToken(user, 200, res);
+  createAndSendToken(user, 200, req, res);
 });
 
 // Example of NoSQl attack if we know password, but don't know email:

@@ -40,6 +40,8 @@ const corsOptions = {
 
 const app = express();
 
+app.enable('trust proxy'); // for heroku, because it redirects original requests. Will enable 'x-forwarded-proto'
+
 app.set('view engine', 'pug');
 app.set('views', `${path.join(__dirname, 'views')}`);
 
