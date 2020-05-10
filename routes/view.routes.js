@@ -1,13 +1,12 @@
 const express = require('express');
 const viewController = require('../controllers/view.controller');
 const authController = require('../controllers/auth.controller');
-const bookingController = require('../controllers/booking.controller');
 
 const router = express.Router();
 
 router.get(
   '/',
-  bookingController.createBookingCheckout,
+  // bookingController.createBookingCheckout, // was  needed for local testing, without stripe webhooks
   authController.isLoggedIn,
   viewController.getOverview
 );

@@ -18,6 +18,8 @@ const reviewRouter = require('./routes/review.routes');
 const viewRouter = require('./routes/view.routes');
 const bookingRouter = require('./routes/booking.routes');
 
+const bookingController = require('./controllers/booking.controller');
+
 // const uiUrl = 'http://127.0.0.1:3000';
 // const uiUrl = `${process.env.UI_URL}:${process.env.PORT}`;
 const corsOptions = {
@@ -66,6 +68,9 @@ const limiter = rateLimit({
 
 // to affect only routes that start with '/api'
 app.use('/api', limiter);
+
+// for stripe, we need the body to be in raw format, not JSON. That's why we put it here before, we make use.json()
+app.post('/webhook-checkout', express.raw(), bookingController.webhookCheckout);
 
 // middleware to get 'body' data from request object => makes req.body
 app.use(express.json({ limit: '10kb' }));
