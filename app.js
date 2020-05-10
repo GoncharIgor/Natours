@@ -1,5 +1,6 @@
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
@@ -70,7 +71,12 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // for stripe, we need the body to be in raw format, not JSON. That's why we put it here before, we make use.json()
-app.post('/webhook-checkout', express.raw(), bookingController.webhookCheckout);
+// app.post('/webhook-checkout', express.raw(), bookingController.webhookCheckout);
+app.post(
+  '/webhook-checkout',
+  bodyParser.raw({ type: 'application/json' }),
+  bookingController.webhookCheckout
+);
 
 // middleware to get 'body' data from request object => makes req.body
 app.use(express.json({ limit: '10kb' }));
