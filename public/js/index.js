@@ -3,6 +3,7 @@ import { login, logout } from './login';
 import { updateUserSettings } from './update-settings';
 import { displayMap } from './mapbox';
 import { bookTour } from './stripe';
+import { showAlert } from './alerts';
 
 const mapElement = document.getElementById('map');
 const loginForm = document.querySelector('.login-form .form');
@@ -72,6 +73,12 @@ if (bookTourButton) {
     e.target.textContent = 'Processing...';
     const { tourId } = e.target.dataset; // converted from attribute: 'data-tour-id'
     await bookTour(tourId);
-    e.target.textContent = 'Book tour now!'
+    e.target.textContent = 'Book tour now!';
   });
+}
+
+const alertMessage = document.querySelector('body').dataset.alert;
+
+if (alertMessage) {
+  showAlert('success', alertMessage, 15);
 }

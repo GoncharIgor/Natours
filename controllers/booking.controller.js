@@ -15,7 +15,8 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
     /*success_url: `${req.protocol}://${req.get('host')}/my-tours/?tour=${
       req.params.tourId
     }&user=${req.user.id}&price=${tour.price}`,*/
-    success_url: `${req.protocol}://${req.get('host')}/my-tours`,
+    // ?alert=booking` - to pass 'alert' variable to base template to render result info message
+    success_url: `${req.protocol}://${req.get('host')}/my-tours?alert=booking`,
     cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
     customer_email: req.user.email,
     client_reference_id: req.params.tourId,

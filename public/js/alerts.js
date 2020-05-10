@@ -1,5 +1,5 @@
 /*eslint-disable*/
-export const showAlert = (type, message) => {
+export const showAlert = (type, message, time = 5) => {
   hideAlert();
   const markup = document.createElement('div');
   markup.classList.add('alert');
@@ -7,7 +7,7 @@ export const showAlert = (type, message) => {
   markup.innerHTML = message;
   document.querySelector('body').insertAdjacentElement('afterbegin', markup);
 
-  window.setTimeout(hideAlert, 5000);
+  window.setTimeout(hideAlert, time * 1000);
 };
 
 export const hideAlert = () => {

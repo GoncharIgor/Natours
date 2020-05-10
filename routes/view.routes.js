@@ -4,6 +4,8 @@ const authController = require('../controllers/auth.controller');
 
 const router = express.Router();
 
+router.use(viewController.alerts);
+
 router.get(
   '/',
   // bookingController.createBookingCheckout, // was  needed for local testing, without stripe webhooks

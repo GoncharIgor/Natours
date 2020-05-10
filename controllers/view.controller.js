@@ -73,3 +73,15 @@ exports.updateUserData = catchAsync(async (req, res, next) => {
     user: updatedUser,
   });
 });
+
+exports.alerts = (req, res, next) => {
+  const { alert } = req.query;
+
+  // to add 'alert' var in pug template
+  if (alert === 'booking') {
+    res.locals.alert =
+      'Your booking was successful. Please check your email for confirmation. If your booking does not show here immediately, please come back later';
+  }
+
+  next();
+};
