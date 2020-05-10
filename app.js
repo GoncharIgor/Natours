@@ -1,6 +1,5 @@
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
 const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
@@ -74,7 +73,7 @@ app.use('/api', limiter);
 // app.post('/webhook-checkout', express.raw(), bookingController.webhookCheckout);
 app.post(
   '/webhook-checkout',
-  bodyParser.raw({ type: 'application/json' }),
+  express.raw({ type: 'application/json' }),
   bookingController.webhookCheckout
 );
 
