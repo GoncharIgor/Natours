@@ -26,7 +26,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
         name: `${tour.name} Tour`,
         description: tour.summary,
         images: [
-          `https://natours-igorgo.herokuapp.com/img/tours/${tour.imageCover}`,
+          `${req.protocol}://${req.get('host')}/img/tours/${tour.imageCover}`,
         ],
         amount: tour.price * 100,
         currency: 'usd',
@@ -62,7 +62,7 @@ const createBookingCheckoutForStripe = async (session) => {
   // client_ref_id is, customer_email stored in getCheckoutSession()
   const tour = session.client_reference_id;
   const user = (await User.findOne({ email: session.customer_email })).id; // get userId
-  const price = session.line_items[0].amount / 100;
+  const price = session.display_items[0].amount / 100;
 
   await Booking.create({ tour, user, price });
 };
