@@ -1,5 +1,6 @@
 /*eslint-disable*/
 import { login, logout } from './login';
+import { signup } from './signup';
 import { updateUserSettings } from './update-settings';
 import { displayMap } from './mapbox';
 import { bookTour } from './stripe';
@@ -7,6 +8,7 @@ import { showAlert } from './alerts';
 
 const mapElement = document.getElementById('map');
 const loginForm = document.querySelector('.login-form .form');
+const signupForm = document.querySelector('.signup-form .form');
 const updateUserInfoForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-settings');
 const logoutButton = document.querySelector('.nav__el--logout');
@@ -24,6 +26,19 @@ if (loginForm) {
 
     event.preventDefault();
     login(email, password);
+  });
+}
+
+if (signupForm) {
+  signupForm.addEventListener('submit', (event) => {
+    console.log('HERE');
+    const name = document.getElementById('signup-name').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const passwordConfirm = document.getElementById('signup-passwordConfirm').value;
+
+    event.preventDefault();
+    signup(name, email, password, passwordConfirm);
   });
 }
 
